@@ -196,8 +196,8 @@ for i in range(max_retries):
 ## 실행 방법
 
 ```bash
-git clone https://github.com/jjuny0326/ai-splendor.git
-cd ai-splendor
+git clone https://github.com/jjuny0326/ai-splendor-boardgame.git
+cd ai-splendor-boardgame
 
 pip install -r requirements.txt
 
