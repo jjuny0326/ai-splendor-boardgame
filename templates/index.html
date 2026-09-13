@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI SPLENDOR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <header class="glass-header">
+        <div class="brand">
+            <i class="fa-solid fa-gem brand-icon"></i>
+            <div class="brand-text">
+                <h1>SPLENDOR</h1>
+                <span class="sub">AI ASSISTANT</span>
+            </div>
+        </div>
+        <div class="header-controls">
+            <button id="undo-btn" class="icon-btn" title="실행 취소" style="margin-right: 8px;">
+                <i class="fa-solid fa-rotate-left"></i>
+            </button>
+            
+            <button id="reset-btn" class="icon-btn" title="초기화">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
+            
+            <div class="turn-badge" id="turn-indicator">
+                <span class="dot"></span> <span id="turn-text">내 차례</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        
+        <div id="tab-player" class="tab-content active">
+            <div class="camera-card glass-panel">
+                <div class="video-frame">
+                    <video id="video" autoplay playsinline></video>
+                    <div class="scan-grid"></div>
+                    <div class="scanner-bar"></div>
+                    <div class="status-overlay">4K LIVE</div>
+                </div>
+                <canvas id="canvas" style="display:none;"></canvas>
+                
+                <button id="scan-btn" class="btn btn-main">
+                    <span class="btn-content"><i class="fa-solid fa-camera"></i> 턴 종료 & 스캔</span>
+                    <div class="shimmer"></div>
+                </button>
+            </div>
+
+            <div class="dashboard">
+                <div class="player-panel" id="panel-ai">
+                    <div class="panel-top">
+                        <div class="avatar ai-avatar"><i class="fa-solid fa-robot"></i></div>
+                        <span class="name">AI</span>
+                        <span class="score" id="ai-score">0</span>
+                    </div>
+                    <div class="inventory" id="ai-gems"></div>
+                </div>
+
+                <div class="action-area">
+                    <button id="ai-turn-btn" class="btn-fab">
+                        <i class="fa-solid fa-bolt"></i>
+                    </button>
+                    <span class="fab-label">AI 실행</span>
+                </div>
+
+                <div class="player-panel active-p" id="panel-human">
+                    <div class="panel-top">
+                        <div class="avatar human-avatar"><i class="fa-solid fa-user"></i></div>
+                        <span class="name">ME</span>
+                        <span class="score" id="human-score">0</span>
+                    </div>
+                    <div class="inventory" id="human-gems"></div>
+                </div>
+            </div>
+
+            <div class="log-card glass-panel">
+                <div class="log-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                <span id="ai-log">게임을 시작합니다.</span>
+            </div>
+        </div>
+
+        <div id="tab-chat" class="tab-content">
+            <div class="chat-container glass-panel">
+                <div class="chat-history" id="chat-history">
+                    <div class="msg bot">
+                        <div class="bubble">안녕하세요! 스플렌더 전략이나 규칙을 물어보세요. 🤖</div>
+                    </div>
+                </div>
+                <div class="chat-input-box">
+                    <input type="text" id="chat-input" placeholder="질문을 입력하세요...">
+                    <button id="chat-send-btn" class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <nav class="bottom-tab-bar glass-panel">
+        <button class="tab-btn active" onclick="switchTab('player')">
+            <i class="fa-solid fa-gamepad"></i> <span>플레이</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('chat')">
+            <i class="fa-solid fa-comments"></i> <span>챗봇</span>
+        </button>
+    </nav>
+
+    <div id="confirm-modal" class="modal">
+        <div class="modal-box glass-panel tilt-in">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-eye"></i> 인식 결과</h3>
+            </div>
+            <div class="modal-body">
+                <div style="text-align:center; margin-bottom:10px;">
+                    <img id="debug-view" src="" style="width:100%; border-radius:8px; display:none;">
+                </div>
+                <div id="diff-content"></div>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-no" class="btn btn-outline">재촬영</button>
+                <button id="btn-yes" class="btn btn-primary">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-modal" class="modal">
+        <div class="modal-box win-box">
+            <i class="fa-solid fa-trophy win-icon"></i>
+            <h2 id="win-title">VICTORY!</h2>
+            <button onclick="location.reload()" class="btn btn-primary">다시 하기</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

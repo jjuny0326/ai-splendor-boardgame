@@ -1,0 +1,146 @@
+:root {
+    --bg-dark: #050505;
+    --glass-bg: rgba(20, 20, 25, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --primary: #FFD700; /* Gold */
+    --accent: #00F3FF;  /* Cyan */
+    --danger: #FF0055;  /* Red */
+    --text: #ffffff;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background-color: var(--bg-dark); color: var(--text); font-family: 'Noto Sans KR', sans-serif; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
+
+/* 배경 */
+.bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; animation: float 10s infinite alternate; }
+.orb-1 { width: 300px; height: 300px; background: rgba(0, 243, 255, 0.1); top: -50px; left: -50px; }
+.orb-2 { width: 250px; height: 250px; background: rgba(255, 0, 85, 0.1); bottom: -50px; right: -50px; }
+@keyframes float { 0% {transform: translate(0,0);} 100% {transform: translate(30px, 50px);} }
+#particle-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+/* 레이아웃 */
+.app-container {
+    width: 100%; max-width: 480px; height: 100%;
+    padding: 80px 15px 90px 15px; /* 헤더/탭바 공간 확보 */
+    display: flex; flex-direction: column; gap: 15px;
+    position: relative; z-index: 2; overflow-y: auto;
+}
+/* 스크롤바 숨김 */
+.app-container::-webkit-scrollbar { display: none; }
+
+/* 유리 패널 */
+.glass-panel { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+
+/* 헤더 */
+.glass-header {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px; height: 70px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 20px; z-index: 100; background: rgba(10, 10, 15, 0.95);
+    border-bottom: 1px solid var(--glass-border); border-radius: 0 0 20px 20px;
+}
+.brand { display: flex; gap: 10px; align-items: center; }
+.brand-icon { font-size: 22px; color: var(--primary); }
+.brand-text h1 { margin: 0; font-size: 18px; letter-spacing: 1px; }
+.brand-text .sub { font-size: 10px; color: #aaa; letter-spacing: 2px; display: block; }
+.header-controls { display: flex; gap: 10px; align-items: center; }
+
+.icon-btn { background: rgba(255,255,255,0.1); border: none; color: #ccc; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+.turn-badge { padding: 5px 12px; border-radius: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+.turn-active-human .dot { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.turn-active-ai .dot { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+/* 카메라 */
+.camera-section { padding: 10px; }
+.video-wrapper { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); aspect-ratio: 4/3; background: #000; }
+video { width: 100%; height: 100%; object-fit: cover; }
+.scan-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(0, 240, 255, 0.2) 51%, transparent 52%); background-size: 100% 200%; animation: scan 3s infinite linear; pointer-events: none; }
+@keyframes scan { 0% {background-position: 0% 0%;} 100% {background-position: 0% 200%;} }
+.status-overlay { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: var(--accent); font-size: 10px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--accent); font-weight: bold; }
+
+.btn { width: 100%; padding: 15px; border-radius: 14px; border: none; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 16px; }
+.btn-main { margin-top: 12px; background: linear-gradient(135deg, var(--accent), #2980b9); color: #000; box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3); }
+.btn-main:active { transform: scale(0.97); }
+
+/* 대시보드 */
+.dashboard { display: flex; gap: 10px; align-items: stretch; min-height: 170px; }
+.player-panel { flex: 1; background: rgba(255,255,255,0.03); border-radius: 16px; padding: 10px; display: flex; flex-direction: column; border-top: 2px solid transparent; transition: 0.3s; }
+.active-p { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
+#panel-human.active-p { border-color: var(--accent); box-shadow: 0 5px 20px rgba(0, 240, 255, 0.15); }
+#panel-ai.active-p { border-color: var(--danger); box-shadow: 0 5px 20px rgba(255, 45, 85, 0.15); }
+
+.panel-top { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-bottom: 8px; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.human-avatar { background: rgba(0, 240, 255, 0.2); color: var(--accent); }
+.ai-avatar { background: rgba(255, 45, 85, 0.2); color: var(--danger); }
+.name { font-size: 11px; color: #aaa; letter-spacing: 1px; }
+.score { font-size: 24px; font-weight: 900; color: white; }
+
+/* 보석 인벤토리 (슬롯형) */
+.inventory { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: auto; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 10px; }
+.inv-slot { height: 40px; background: rgba(255,255,255,0.03); border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative; }
+.inv-slot.has { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); }
+.inv-slot.empty { opacity: 0.2; filter: grayscale(100%); }
+
+/* 3D 토큰 */
+.gem-token { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 3px 5px rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.5); border: 1px solid rgba(0,0,0,0.2); }
+.g-ruby { background: radial-gradient(at 30% 30%, #ff7675, #c0392b); }
+.g-sapphire { background: radial-gradient(at 30% 30%, #74b9ff, #0984e3); }
+.g-emerald { background: radial-gradient(at 30% 30%, #55efc4, #00b894); }
+.g-diamond { background: radial-gradient(at 30% 30%, #ffffff, #b2bec3); }
+.g-onyx { background: radial-gradient(at 30% 30%, #636e72, #2d3436); }
+.g-gold { background: radial-gradient(at 30% 30%, #ffeaa7, #d35400); border: 1px solid #fab1a0; }
+.count-tag { position: absolute; bottom: -3px; right: -3px; font-size: 10px; font-weight: bold; color: #fff; background: #000; padding: 1px 4px; border-radius: 4px; }
+
+/* 중앙 버튼 */
+.action-area { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.btn-fab { width: 52px; height: 52px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--danger), #b33939); color: white; font-size: 22px; box-shadow: 0 0 20px rgba(255, 45, 85, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+.btn-fab:active { transform: scale(0.9); }
+.fab-label { font-size: 10px; margin-top: 6px; color: #888; }
+
+/* 로그 */
+.log-card { padding: 14px; display: flex; align-items: center; gap: 12px; font-size: 13px; color: #eee; border-left: 4px solid var(--primary); }
+.log-icon { font-size: 18px; color: var(--primary); }
+
+/* 탭바 */
+.bottom-tab-bar {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    width: 90%; max-width: 400px; height: 60px;
+    display: flex; justify-content: space-around; align-items: center;
+    z-index: 100; background: rgba(20, 20, 25, 0.95); border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.tab-btn { background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; cursor: pointer; transition: 0.3s; flex: 1; }
+.tab-btn i { font-size: 20px; }
+.tab-btn.active { color: var(--primary); }
+.tab-btn.active i { transform: translateY(-3px); text-shadow: 0 0 10px var(--primary); }
+
+/* 채팅창 */
+.chat-container { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.chat-history { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+.msg { display: flex; align-items: flex-end; gap: 8px; }
+.msg.user { flex-direction: row-reverse; }
+.bubble { padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; max-width: 85%; }
+.msg.bot .bubble { background: rgba(255,255,255,0.1); border-bottom-left-radius: 4px; }
+.msg.user .bubble { background: var(--accent); color: #000; border-bottom-right-radius: 4px; font-weight: 600; }
+.chat-input-box { padding: 12px; background: rgba(0,0,0,0.3); display: flex; gap: 8px; border-top: 1px solid var(--glass-border); }
+#chat-input { flex: 1; background: rgba(255,255,255,0.1); border: none; border-radius: 20px; padding: 10px 15px; color: white; outline: none; }
+.send-btn { background: var(--primary); width: 38px; height: 38px; border-radius: 50%; border: none; color: #000; cursor: pointer; }
+
+/* 모달 */
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+.modal-box { width: 85%; max-width: 320px; background: #1e1e24; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; animation: zoomIn 0.2s; }
+@keyframes zoomIn { from {transform: scale(0.9); opacity:0;} to {transform: scale(1); opacity:1;} }
+.modal-header { padding: 15px; background: #25252e; text-align: center; border-bottom: 1px solid #333; }
+.modal-header h3 { margin: 0; color: var(--accent); font-size: 16px; }
+.modal-body { padding: 20px; color: #eee; font-size: 14px; }
+.debug-img-wrapper img { width: 100%; border-radius: 8px; border: 1px solid #444; }
+.legend { display: flex; justify-content: center; gap: 10px; font-size: 10px; margin-top: 8px; color: #aaa; }
+.modal-actions { padding: 15px; display: flex; gap: 10px; background: #25252e; }
+.btn-primary { flex: 2; background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+.btn-outline { flex: 1; background: transparent; border: 1px solid #555; color: #ccc; padding: 12px; border-radius: 10px; cursor: pointer; }
+.text-green { color: #00ff00; } .text-blue { color: #00ffff; }
+
+.tab-content { display: none; height: 100%; flex-direction: column; gap: 15px; }
+.tab-content.active { display: flex; }

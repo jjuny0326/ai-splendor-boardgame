@@ -1,0 +1,40 @@
+# ── 환경 변수 (절대 커밋 금지) ─────────────────
+.env
+.env.local
+
+# ── 데이터셋 (Roboflow에서 내려받음) ───────────
+AIBoardGame-2/
+AIBoardGame-3/
+AIBoardGame-4/
+datasets/
+
+# ── 학습 산출물 ────────────────────────────────
+# 공유할 그래프는 docs/ 로 복사해서 커밋
+runs/
+yolov8n.pt
+
+# ── 참조 이미지 (133MB, Releases로 배포) ───────
+reference_imgs/
+
+# ── 실행 중 생성되는 임시 파일 ─────────────────
+temp.jpg
+temp_*.jpg
+static/debug_*.jpg
+
+# ── 도구 바이너리 ──────────────────────────────
+ngrok.exe
+*.exe
+
+# ── Python ─────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ── IDE / OS ───────────────────────────────────
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

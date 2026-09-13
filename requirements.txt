@@ -1,0 +1,10 @@
+# 실행에 필요한 패키지
+flask
+opencv-python
+numpy
+ultralytics
+google-generativeai
+python-dotenv
+
+# 재학습(train.py)에만 필요
+roboflow
