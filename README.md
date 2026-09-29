@@ -259,15 +259,6 @@ python check_setup.py       # 모델·참조이미지·DB 점검
 python app.py
 ```
 
-[http://localhost:5000](http://localhost:5000) 접속
-
-> ⚠️ **참조 이미지가 별도로 필요합니다.**
-> 카드 식별(AKAZE)에 쓰이는 `reference_imgs/` 폴더는 용량 문제로 저장소에 포함되어 있지 않습니다.
-> [Releases](../../releases)에서 `reference_imgs.zip`을 받아 프로젝트 루트에 풀어주세요.
-> 없어도 서버는 뜨지만 카드 종류는 식별되지 않습니다.
-
----
-
 ## 데이터셋
 
 Roboflow Universe에 공개되어 있습니다. (CC BY 4.0)
