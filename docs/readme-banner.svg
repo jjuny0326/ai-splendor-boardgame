@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="440" viewBox="0 0 1200 440" role="img" aria-labelledby="title desc">
+  <title id="title">AI Splendor — Physical board. Digital opponent.</title>
+  <desc id="desc">A dark navy and gold banner with illustrated cards, gemstone tokens, and a computer vision scanning frame.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0b1324"/><stop offset="1" stop-color="#182c3e"/></linearGradient>
+    <linearGradient id="card" x2="0" y2="1"><stop stop-color="#294659"/><stop offset="1" stop-color="#122334"/></linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#9ec6d5" stroke-opacity=".045"/></pattern>
+    <g id="gem"><path d="M-19-8-10-19H10L19-8 0 20Z" fill="currentColor"/><path d="M-19-8H19M-10-19-7-8 0 20 7-8 10-19M-7-8H7" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1.4"/></g>
+    <g id="game-card"><rect width="100" height="136" rx="12" fill="url(#card)" stroke="#698396" stroke-opacity=".6"/><path d="M12 92 43 45 61 67 80 34 89 92Z" fill="#80b6c6" opacity=".16"/><path d="M12 99H88" stroke="#7890a0" stroke-opacity=".4"/><circle cx="20" cy="116" r="5" fill="#e9bc6e"/><circle cx="36" cy="116" r="5" fill="#58c7b8"/><circle cx="52" cy="116" r="5" fill="#8a9ddb"/></g>
+  </defs>
+  <rect width="1200" height="440" rx="22" fill="url(#bg)"/>
+  <rect width="1200" height="440" rx="22" fill="url(#grid)"/>
+  <circle cx="1075" cy="120" r="230" fill="#52b7ba" opacity=".035"/>
+  <circle cx="1030" cy="165" r="180" fill="none" stroke="#79bcc7" stroke-opacity=".1"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="58" y="54" width="213" height="30" rx="15" fill="#e9bc6e" fill-opacity=".1" stroke="#e9bc6e" stroke-opacity=".35"/>
+    <text x="78" y="74" font-size="12" font-weight="600" letter-spacing="2" fill="#edc98b">VISION × BOARD GAME</text>
+    <text x="56" y="177" font-size="70" font-weight="750" letter-spacing="-2" fill="#f4f4ee">AI <tspan fill="#edc98b">Splendor</tspan></text>
+    <text x="60" y="221" font-size="24" fill="#dbe6ee">Physical board. Digital opponent.</text>
+    <text x="60" y="258" font-size="16" fill="#91a8bb">One photo connects your next move to AI.</text>
+    <g font-size="13" fill="#c8d7e4" text-anchor="middle">
+      <rect x="60" y="299" width="91" height="32" rx="8" fill="#22374a"/><text x="105" y="320">YOLOv8</text>
+      <rect x="162" y="299" width="85" height="32" rx="8" fill="#22374a"/><text x="204" y="320">AKAZE</text>
+      <rect x="258" y="299" width="91" height="32" rx="8" fill="#22374a"/><text x="303" y="320">Gemini</text>
+    </g>
+    <text x="60" y="392" font-size="11" letter-spacing="2.3" fill="#7c94a8">SEJONG UNIVERSITY / CAPSTONE 2025</text>
+    <g transform="translate(727 67)">
+      <rect x="-24" y="-16" width="383" height="301" rx="20" fill="#091421" fill-opacity=".5" stroke="#40596c"/>
+      <use href="#game-card" x="0" y="34"/><use href="#game-card" x="116" y="34"/><use href="#game-card" x="232" y="34"/>
+      <use href="#gem" transform="translate(50 93)" color="#58c7b8"/>
+      <use href="#gem" transform="translate(166 93)" color="#8a9ddb"/>
+      <use href="#gem" transform="translate(282 93)" color="#e2948c"/>
+      <g fill="#172b3a" stroke-width="2"><circle cx="48" cy="219" r="25" stroke="#58c7b8"/><circle cx="107" cy="219" r="25" stroke="#8a9ddb"/><circle cx="166" cy="219" r="25" stroke="#e9bc6e"/><circle cx="225" cy="219" r="25" stroke="#e2948c"/><circle cx="284" cy="219" r="25" stroke="#dce6eb"/></g>
+      <g fill="#58c7b8" font-size="10" font-family="Consolas, monospace"><text x="3" y="25">CARD DETECTED</text><text x="235" y="25">CARD DETECTED</text></g>
+      <path d="M-8 52V26H16M84 26H108V52M-8 152V178H16M84 178H108V152M224 52V26H248M316 26H340V52M224 152V178H248M316 178H340V152" fill="none" stroke="#58c7b8" stroke-width="2.5"/>
+      <path d="M-12 127H345" stroke="#58c7b8" stroke-opacity=".35"/>
+      <text x="167" y="266" fill="#7795a9" font-size="10" text-anchor="middle" letter-spacing="2">BOARD RECOGNITION / CONCEPT</text>
+    </g>
+  </g>
+</svg>

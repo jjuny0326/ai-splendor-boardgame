@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">Two-stage board recognition pipeline</title>
+  <desc id="desc">YOLOv8 detects cards and tokens. Cards are resized to 500 pixels wide, then their lower-left cost area is cropped and enhanced with CLAHE. AKAZE and Hamming matching identify the card ID for the game state.</desc>
+  <defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="m0 0 7 3.5-7 3.5" fill="none" stroke="#6a899b"/></marker></defs>
+  <rect width="1200" height="320" rx="18" fill="#101e2d"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="32" y="37" fill="#edc98b" font-size="12" letter-spacing="2">FROM PIXELS TO GAME STATE</text>
+    <g fill="#172c3c" stroke="#355065"><rect x="30" y="60" width="250" height="224" rx="12"/><rect x="325" y="60" width="250" height="224" rx="12"/><rect x="620" y="60" width="250" height="224" rx="12"/><rect x="915" y="60" width="255" height="224" rx="12"/></g>
+    <g fill="#f0f3f6" font-size="18" font-weight="600"><text x="48" y="93">01 / Detect</text><text x="343" y="93">02 / Focus</text><text x="638" y="93">03 / Match</text><text x="933" y="93">04 / Identify</text></g>
+    <g fill="none" stroke="#6a899b" stroke-width="2" marker-end="url(#arrow)"><path d="M287 173H316"/><path d="M582 173H611"/><path d="M877 173H906"/></g>
+    <g fill="#263f50" stroke="#58c7b8"><rect x="63" y="120" width="39" height="55" rx="4"/><rect x="113" y="120" width="39" height="55" rx="4"/><rect x="163" y="120" width="39" height="55" rx="4"/><circle cx="81" cy="198" r="12"/><circle cx="122" cy="198" r="12"/><circle cx="163" cy="198" r="12"/><circle cx="204" cy="198" r="12"/></g>
+    <rect x="358" y="112" width="82" height="107" rx="5" fill="#263f50" stroke="#8399a9"/>
+    <rect x="358" y="150" width="37" height="69" fill="#58c7b8" fill-opacity=".3" stroke="#58c7b8"/>
+    <g fill="#b4c6d3" font-size="12"><text x="454" y="156">Lower-left</text><text x="454" y="175">cost region</text><text x="454" y="201" fill="#58c7b8">45% × 65%</text></g>
+    <g fill="#263f50" stroke="#8399a9"><rect x="645" y="120" width="60" height="88" rx="5"/><rect x="762" y="120" width="60" height="88" rx="5"/></g>
+    <g stroke="#58c7b8" stroke-opacity=".65"><path d="m661 137 116 8m-111 10 118 10m-126 9 129-26m-119 43 122-1"/></g>
+    <g fill="#edc98b"><circle cx="661" cy="137" r="3"/><circle cx="666" cy="155" r="3"/><circle cx="658" cy="174" r="3"/><circle cx="668" cy="191" r="3"/><circle cx="777" cy="145" r="3"/><circle cx="784" cy="165" r="3"/><circle cx="787" cy="148" r="3"/><circle cx="790" cy="190" r="3"/></g>
+    <g font-family="Consolas, monospace" font-size="15"><text x="942" y="147" fill="#91a8bb">{</text><text x="958" y="174" fill="#58c7b8">"id": "l1_01"</text><text x="942" y="201" fill="#91a8bb">}</text></g>
+    <g fill="#c9d7e1" font-size="14"><text x="48" y="244">YOLOv8 · 10 classes</text><text x="343" y="244">Resize to 500px → CLAHE</text><text x="638" y="244">AKAZE + BFMatcher</text><text x="933" y="244">Card database → game state</text></g>
+    <g fill="#839daf" font-size="11"><text x="48" y="266">Cards / nobles / gem tokens</text><text x="343" y="266">Crop shown for development cards</text><text x="638" y="266">Hamming distance · ratio test 0.8</text><text x="933" y="266">Illustrative card ID</text></g>
+  </g>
+</svg>
