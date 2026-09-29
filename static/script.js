@@ -142,6 +142,11 @@ function handleResult(data) {
 document.getElementById('btn-yes').onclick = async () => {
     const res = await fetch('/confirm_human', { method: 'POST' });
     const data = await res.json();
+    if (!res.ok || data.status !== 'success') {
+        modal.style.display = "none";
+        log.innerText = data.message || data.error || "턴을 확정하지 못했습니다. 다시 촬영해주세요.";
+        return;
+    }
     updateUI(data.current_state);
     modal.style.display = "none";
     log.innerHTML = "✅ 턴 종료. <span style='color:var(--danger)'>AI 실행 버튼을 누르세요.</span>";

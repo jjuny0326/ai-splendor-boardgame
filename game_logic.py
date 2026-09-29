@@ -1,5 +1,6 @@
 from database import CardDatabase
 import copy
+from collections import Counter
 
 class GameLogic:
     def __init__(self):
@@ -37,7 +38,29 @@ class GameLogic:
         return True, "이전 턴으로 되돌렸습니다."
 
     # --- 추론 ---
+    def _validate_scan_gems(self, new_board_data):
+        gems = new_board_data.get('gems', {})
+        if set(gems) != set(self.TOTAL_GEMS):
+            raise ValueError("보석 인식 데이터가 불완전합니다. 다시 촬영해주세요.")
+        taken = 0
+        for gem, count in gems.items():
+            if type(count) is not int or count < 0:
+                raise ValueError("보석 개수는 0 이상의 정수여야 합니다.")
+            diff = count - self.game_state['board']['gems'][gem]
+            if diff < -3:
+                raise ValueError(f"{gem} {abs(diff)}개 감소 감지. 다시 촬영해주세요.")
+            taken += max(0, -diff)
+        if taken > 3:
+            raise ValueError("한 턴에 보석이 3개 넘게 감소했습니다. 다시 촬영해주세요.")
+
+    def _validate_card_action(self, changes):
+        if changes.get('missing_cards') and changes.get('action_type') not in (
+            'buy', 'buy_reserved', 'reserve'
+        ):
+            raise ValueError("카드가 사라졌지만 구매·예약 행동을 확인할 수 없습니다. 재촬영해주세요.")
+
     def infer_human_turn(self, new_board_data):
+        self._validate_scan_gems(new_board_data)
         old_board = self.game_state['board']
         human = self.game_state['players']['human']
         ai = self.game_state['players']['ai'] # AI 정보도 필요
@@ -64,7 +87,6 @@ class GameLogic:
             new_cnt = new_board_data['gems'].get(gem, 0)
             diff = new_cnt - old_cnt
             
-            if abs(diff) > 3: continue
             if diff != 0:
                 changes["gem_diff"][gem] = diff
                 if diff < 0: gem_taken_count += abs(diff)
@@ -82,11 +104,13 @@ class GameLogic:
             valid = []
             for cid in missing:
                 info = self.db.get_card_info(cid)
-                if info and self._can_buy(human, info['cost']): valid.append(cid)
+                if info: valid.append(cid)
             changes["missing_cards"].extend(valid)
 
         # 3. 행동 판단
         if len(changes["missing_cards"]) == 1 and gold_change == -1:
+            if len(human['cards_reserved']) >= 3:
+                raise ValueError("예약 카드는 최대 3장입니다.")
             changes["action_type"] = "reserve"
         elif gem_taken_count > 0:
             changes["action_type"] = "take_gems"
@@ -94,6 +118,10 @@ class GameLogic:
             for k in list(changes["gem_diff"]): 
                 if changes["gem_diff"][k] > 0: del changes["gem_diff"][k]
         elif gem_paid_count > 0:
+            changes['missing_cards'] = [
+                cid for cid in changes['missing_cards']
+                if self._can_buy(human, self.db.get_card_info(cid)['cost'])
+            ]
             if changes["missing_cards"]:
                 changes["action_type"] = "buy"
             else:
@@ -105,9 +133,12 @@ class GameLogic:
             for k in list(changes["gem_diff"]): 
                 if changes["gem_diff"][k] < 0: del changes["gem_diff"][k]
         
+        self._validate_card_action(changes)
         return changes
 
     def confirm_human_turn(self, changes, new_board_data):
+        self._validate_scan_gems(new_board_data)
+        self._validate_card_action(changes)
         self.save_state()
         human = self.game_state['players']['human']
         ai = self.game_state['players']['ai']
@@ -176,17 +207,20 @@ class GameLogic:
         if cn: self.game_state['board']['nobles'] = cn
 
     # Helper & AI Action
+    def _payment(self, p, cost):
+        discounts = Counter(c.get('gem') for c in p['cards_owned'])
+        payment = Counter()
+        for gem, amount in cost.items():
+            required = max(0, amount - discounts[gem])
+            colored = min(required, p['gems'].get(gem, 0))
+            payment[gem] += colored
+            payment['gold'] += required - colored
+        if payment['gold'] > p['gems'].get('gold', 0):
+            return None
+        return {gem: amount for gem, amount in payment.items() if amount}
+
     def _can_buy(self, p, cost):
-        disc = {}
-        for c in p['cards_owned']:
-            g=c.get('gem')
-            if g: disc[g]=disc.get(g,0)+1
-        m=0
-        for g,a in cost.items():
-            r=max(0, a-disc.get(g,0))
-            h=p['gems'].get(g,0)
-            if h<r: m+=(r-h)
-        return p['gems'].get('gold',0)>=m
+        return self._payment(p, cost) is not None
 
     def _find_card_by_payment(self, p, paid, src="board"):
         disc = {}
@@ -203,28 +237,28 @@ class GameLogic:
         return None
 
     def apply_action(self, pid, action):
+        if not isinstance(action, dict):
+            return False, "행동은 JSON 객체여야 합니다."
         p = self.game_state['players'][pid]
         b = self.game_state['board']
         act = action.get('action')
 
         if act == "resign": return True, "AI 패배 선언 (GG)"
-        self.save_state()
 
         if act == "buy_card":
             cid = action.get('card_id')
-            card = self.db.get_card_info(cid)
+            available = p['cards_reserved'] + [
+                c for cards in b['cards_open'].values() for c in cards
+            ]
+            card = next((c for c in available if c.get('id') == cid), None)
             if not card: return False, "카드 없음"
-            if not self._can_buy(p, card['cost']): return False, "자원 부족"
+            payment = self._payment(p, card['cost'])
+            if payment is None: return False, "자원 부족"
 
-            disc = {}
-            for c in p['cards_owned']:
-                g = c.get('gem')
-                if g: disc[g] = disc.get(g,0)+1
-            
-            for g, amt in card['cost'].items():
-                real = max(0, amt - disc.get(g, 0))
-                p['gems'][g] = max(0, p['gems'].get(g,0) - real)
-                b['gems'][g] += real
+            self.save_state()
+            for gem, amount in payment.items():
+                p['gems'][gem] -= amount
+                b['gems'][gem] += amount
 
             p['cards_owned'].append(card)
             p['points'] += card['points']
@@ -238,16 +272,26 @@ class GameLogic:
 
         elif act == "take_gems":
             gems = action.get('gems', [])
-            if not (1<=len(gems)<=3): return False, "1~3개 가능"
+            if not isinstance(gems, list) or not (1<=len(gems)<=3):
+                return False, "1~3개 가능"
+            if any(not isinstance(g, str) or g not in self.TOTAL_GEMS or g == 'gold' for g in gems):
+                return False, "일반 보석만 가져올 수 있습니다."
+            counts = Counter(gems)
+            if len(counts) != len(gems):
+                if len(gems) != 2 or len(counts) != 1:
+                    return False, "같은 색은 2개만 가져올 수 있습니다."
+                if b['gems'][gems[0]] < 4:
+                    return False, "같은 색 2개는 재고가 4개 이상일 때만 가능합니다."
             
             # [규칙: 10개 제한]
             if sum(p['gems'].values()) + len(gems) > 10: return False, "보유 한도 10개 초과"
 
             # [규칙: 보드 재고 확인]
             # AI가 없는 보석을 가져갈 수 없음
-            for g in gems:
-                if b['gems'].get(g, 0) < 1: return False, f"{g} 재고 없음"
+            for g, amount in counts.items():
+                if b['gems'].get(g, 0) < amount: return False, f"{g} 재고 없음"
 
+            self.save_state()
             for g in gems:
                 b['gems'][g] -= 1
                 p['gems'][g] = p['gems'].get(g, 0) + 1
@@ -255,10 +299,12 @@ class GameLogic:
 
         elif act == "reserve_card":
             cid = action.get('card_id')
-            card = self.db.get_card_info(cid)
+            card = next((c for cards in b['cards_open'].values()
+                         for c in cards if c.get('id') == cid), None)
             if not card: return False, "카드 없음"
             if len(p['cards_reserved']) >= 3: return False, "예약 초과"
             
+            self.save_state()
             p['cards_reserved'].append(card)
             for lv in ['level_1', 'level_2', 'level_3']:
                 b['cards_open'][lv] = [c for c in b['cards_open'][lv] if c.get('id') != cid]

@@ -45,6 +45,9 @@ class LLMBrain:
         """
 
 
+        if feedback:
+            prompt += f"\n[이전 행동 거절 사유]\n{feedback}\n이 사유를 해결하는 유효한 행동을 선택하세요.\n"
+
         try:
             res = self.model.generate_content(prompt)
             return json.loads(self._clean(res.text))

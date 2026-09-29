@@ -40,6 +40,8 @@ def reset_game():
 
 @app.route('/scan', methods=['POST'])
 def scan_board():
+    global PENDING_DATA
+    PENDING_DATA = {}
     # 1. 이미지 받기
     if 'image' not in request.files: 
         return jsonify({"error": "이미지가 없습니다."}), 400
@@ -49,6 +51,8 @@ def scan_board():
     
     # 2. 인식 실행
     vision_data = recognizer.process_image("temp.jpg")
+    if 'error' in vision_data:
+        return jsonify({"status": "error", "message": vision_data['error']}), 400
     
     # 안전장치 1: 아무것도 못 찾음
     total_gems = sum(vision_data['gems'].values())
@@ -61,18 +65,12 @@ def scan_board():
         })
 
     # 3. 변화 추론
-    changes = game_engine.infer_human_turn(vision_data)
+    try:
+        changes = game_engine.infer_human_turn(vision_data)
+    except ValueError as exc:
+        return jsonify({"status": "error", "message": str(exc)}), 400
     
-    # 안전장치 2: 보석 급감 체크
-    for gem, diff in changes['gem_diff'].items():
-        if diff < -3:
-            return jsonify({
-                "status": "error",
-                "message": f"⚠️ {gem} {abs(diff)}개 감소 감지. 인식 오류 같습니다."
-            })
-
     # 4. 데이터 임시 저장
-    global PENDING_DATA
     PENDING_DATA = {"changes": changes, "vision_data": vision_data}
     
     # recognition.py가 저장한 '진짜 파일명'을 가져옵니다.
@@ -92,7 +90,11 @@ def confirm_human():
     global PENDING_DATA
     if not PENDING_DATA: return jsonify({"error": "No data"}), 400
     
-    game_engine.confirm_human_turn(PENDING_DATA['changes'], PENDING_DATA['vision_data'])
+    try:
+        game_engine.confirm_human_turn(PENDING_DATA['changes'], PENDING_DATA['vision_data'])
+    except ValueError as exc:
+        PENDING_DATA = {}
+        return jsonify({"status": "error", "message": str(exc)}), 400
     PENDING_DATA = {}
     
     return jsonify({
@@ -134,9 +136,11 @@ def ai_turn():
 
 @app.route('/undo', methods=['POST'])
 def undo_turn():
+    global PENDING_DATA
     success, msg = game_engine.undo_turn()
     
     if success:
+        PENDING_DATA = {}
         # 성공 시 이전 상태(점수 포함) 반환
         return jsonify({
             "status": "success", 
